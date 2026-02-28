@@ -1,74 +1,22 @@
--- RNG Override + Test (Xeno için optimize)
-local oldRandom = math.random
-local oldRandomNew = Random.new
-local oldNextInteger = Random.NextInteger
-local enabled = false
+# MOUNT RNG - Xeno Script
 
--- Override math.random
-math.random = function(a, b)
-    if not enabled then
-        return oldRandom(a, b)
-    else
-        return b or a
-    end
-end
+Bu script, **MOUNT RNG** oyununda RNG (rastgele sayı) mekaniğini manipüle eder.  
+Buton veya F1 tuşu ile açılıp kapanır. Açıkken tüm rastgele sayılar maksimum değeri döndürür.
 
--- Override Random sınıfı
-Random.new = function(...)
-    local rand = oldRandomNew(...)
-    rand.NextInteger = function(self, min, max)
-        if enabled then
-            return max
-        else
-            return oldNextInteger(self, min, max)
-        end
-    end
-    return rand
-end
+## Özellikler
+- `math.random` ve `Random` sınıfını override eder.
+- Küçük bir arayüz (sürüklenebilir).
+- Canlı test ekranı (anlık değerleri gösterir).
+- F1 tuşu ile hızlı aç/kapa.
 
--- Küçük bir test butonu (CoreGui'de)
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 120, 0, 40)
-button.Position = UDim2.new(0, 10, 0, 10)
-button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Text = "RNG: Kapalı"
-button.Font = Enum.Font.GothamBold
-button.TextSize = 16
-button.Parent = game:GetService("CoreGui")
+## Kullanım
+1. Scripti kopyala ve Xeno'ya yapıştır.
+2. Çalıştır.
+3. Ekranda yeşil çerçeveli pencere belirecek.
+4. Kırmızı butona tıkla → yeşil olur ve "Açık" yazar.
+5. Test değerleri 100 olarak sabitlenir.
+6. Tekrar tıkla veya F1'e basarak kapat.
 
--- Test etiketleri
-local testLabel = Instance.new("TextLabel")
-testLabel.Size = UDim2.new(0, 200, 0, 30)
-testLabel.Position = UDim2.new(0, 10, 0, 60)
-testLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-testLabel.TextColor3 = Color3.new(1, 1, 0)
-testLabel.Text = "Test: Bekleniyor..."
-testLabel.Font = Enum.Font.Gotham
-testLabel.TextSize = 14
-testLabel.Parent = game:GetService("CoreGui")
-
--- Buton işlevi
-button.MouseButton1Click:Connect(function()
-    enabled = not enabled
-    if enabled then
-        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        button.Text = "RNG: Açık"
-    else
-        button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        button.Text = "RNG: Kapalı"
-    end
-end)
-
--- Sürekli test yap
-spawn(function()
-    while true do
-        local test1 = math.random(1, 100)
-        local rand = Random.new()
-        local test2 = rand:NextInteger(1, 100)
-        testLabel.Text = string.format("math.random: %d | Random: %d", test1, test2)
-        wait(1)
-    end
-end)
-
-print("✅ RNG scripti yüklendi! Butona tıkla ve test değerlerini izle.")
+## Uyarı
+Bu script **Roblox kurallarına aykırıdır**. Hesabınızın banlanmasına neden olabilir.  
+Sadece eğitim amaçlı kullanın, sorumluluk size aittir.
