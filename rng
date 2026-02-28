@@ -1,50 +1,41 @@
--- Xeno için mini RNG butonu
+-- RNG Override (GUI'siz, F1 ile açılıp kapanır)
 local oldRandom = math.random
-local isEnabled = false
+local oldRandomNew = Random.new
+local oldNextInteger = Random.NextInteger
+local enabled = false
 
+-- Override math.random
 math.random = function(a, b)
-    if not isEnabled then
+    if not enabled then
         return oldRandom(a, b)
     else
-        return b or a  -- her zaman üst sınır
+        return b or a
     end
 end
 
--- Random sınıfı override
-local oldRandomNew = Random.new
+-- Override Random sınıfı
 Random.new = function(...)
-    local r = oldRandomNew(...)
-    local oldNextInt = r.NextInteger
-    r.NextInteger = function(self, min, max)
-        if isEnabled then
+    local rand = oldRandomNew(...)
+    rand.NextInteger = function(self, min, max)
+        if enabled then
             return max
         else
-            return oldNextInt(self, min, max)
+            return oldNextInteger(self, min, max)
         end
     end
-    return r
+    return rand
 end
 
--- Küçük buton (CoreGui'de)
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0, 70, 0, 30)
-button.Position = UDim2.new(0, 10, 0, 10)
-button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Text = "Kapalı"
-button.Font = Enum.Font.GothamBold
-button.TextSize = 14
-button.Parent = game:GetService("CoreGui")
-
-button.MouseButton1Click:Connect(function()
-    isEnabled = not isEnabled
-    if isEnabled then
-        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        button.Text = "Açık"
-    else
-        button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        button.Text = "Kapalı"
+-- F1 tuşu ile aç/kapa
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F1 then
+        enabled = not enabled
+        if enabled then
+            print("✅ RNG AÇIK (her zaman maksimum)")
+        else
+            print("❌ RNG KAPALI (normal)")
+        end
     end
 end)
 
-print("Buton eklendi. Tıkla ve RNG'yi manipüle et.")
+print("RNG scripti hazır. F1 ile aç/kapa.")
