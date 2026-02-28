@@ -1,4 +1,4 @@
--- RNG Override (GUI'siz, F1 ile açılıp kapanır)
+-- RNG Override + Test (Xeno için optimize)
 local oldRandom = math.random
 local oldRandomNew = Random.new
 local oldNextInteger = Random.NextInteger
@@ -26,16 +26,49 @@ Random.new = function(...)
     return rand
 end
 
--- F1 tuşu ile aç/kapa
-game:GetService("UserInputService").InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F1 then
-        enabled = not enabled
-        if enabled then
-            print("✅ RNG AÇIK (her zaman maksimum)")
-        else
-            print("❌ RNG KAPALI (normal)")
-        end
+-- Küçük bir test butonu (CoreGui'de)
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 120, 0, 40)
+button.Position = UDim2.new(0, 10, 0, 10)
+button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Text = "RNG: Kapalı"
+button.Font = Enum.Font.GothamBold
+button.TextSize = 16
+button.Parent = game:GetService("CoreGui")
+
+-- Test etiketleri
+local testLabel = Instance.new("TextLabel")
+testLabel.Size = UDim2.new(0, 200, 0, 30)
+testLabel.Position = UDim2.new(0, 10, 0, 60)
+testLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+testLabel.TextColor3 = Color3.new(1, 1, 0)
+testLabel.Text = "Test: Bekleniyor..."
+testLabel.Font = Enum.Font.Gotham
+testLabel.TextSize = 14
+testLabel.Parent = game:GetService("CoreGui")
+
+-- Buton işlevi
+button.MouseButton1Click:Connect(function()
+    enabled = not enabled
+    if enabled then
+        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        button.Text = "RNG: Açık"
+    else
+        button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        button.Text = "RNG: Kapalı"
     end
 end)
 
-print("RNG scripti hazır. F1 ile aç/kapa.")
+-- Sürekli test yap
+spawn(function()
+    while true do
+        local test1 = math.random(1, 100)
+        local rand = Random.new()
+        local test2 = rand:NextInteger(1, 100)
+        testLabel.Text = string.format("math.random: %d | Random: %d", test1, test2)
+        wait(1)
+    end
+end)
+
+print("✅ RNG scripti yüklendi! Butona tıkla ve test değerlerini izle.")
