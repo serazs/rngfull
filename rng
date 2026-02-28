@@ -1,8 +1,7 @@
 --[[
-    MOUNT RNG - Xeno için RNG Manipülasyonu
-    Açıklama: math.random ve Random sınıfını override eder.
-    Buton ile aç/kapa, F1 tuşu ile de açıp kapatabilirsin.
-    Test etiketi anlık değerleri gösterir.
+    MOUNT RNG - Xeno Uyumlu
+    PlayerGui kullanır (CoreGui yerine)
+    F1 ile aç/kapa
 ]]
 
 -- Orijinal fonksiyonlar
@@ -13,35 +12,46 @@ local enabled = false
 
 -- Override
 math.random = function(a, b)
-    if not enabled then return oldRandom(a, b) else return b or a end
+    if not enabled then
+        return oldRandom(a, b)
+    else
+        return b or a
+    end
 end
 
 Random.new = function(...)
     local rand = oldRandomNew(...)
     rand.NextInteger = function(self, min, max)
-        return enabled and max or oldNextInteger(self, min, max)
+        if enabled then
+            return max
+        else
+            return oldNextInteger(self, min, max)
+        end
     end
     return rand
 end
 
--- GUI (CoreGui'de)
-local coreGui = game:GetService("CoreGui")
+-- Services
+local players = game:GetService("Players")
 local userInput = game:GetService("UserInputService")
+local player = players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
+-- GUI
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0, 10, 0, 10)
+frame.Size = UDim2.new(0, 220, 0, 110)
+frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
 frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
 frame.Active = true
 frame.Draggable = true
-frame.Parent = coreGui
+frame.Parent = playerGui
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-title.Text = "RNG Modifier"
+title.Text = "RNG Modifier (Xeno)"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
@@ -67,31 +77,30 @@ testLabel.Font = Enum.Font.Gotham
 testLabel.TextSize = 12
 testLabel.Parent = frame
 
--- Buton işlevi
-button.MouseButton1Click:Connect(function()
+-- Toggle Fonksiyonu
+local function toggle()
     enabled = not enabled
     button.BackgroundColor3 = enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
     button.Text = enabled and "Açık" or "Kapalı"
-end)
+end
 
--- F1 tuşu işlevi
-userInput.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.F1 then
-        enabled = not enabled
-        button.BackgroundColor3 = enabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-        button.Text = enabled and "Açık" or "Kapalı"
+button.MouseButton1Click:Connect(toggle)
+
+userInput.InputBegan:Connect(function(input, gp)
+    if not gp and input.KeyCode == Enum.KeyCode.F1 then
+        toggle()
     end
 end)
 
 -- Test döngüsü
-spawn(function()
+task.spawn(function()
     while true do
         local val1 = math.random(1, 100)
         local r = Random.new()
         local val2 = r:NextInteger(1, 100)
         testLabel.Text = string.format("math: %d | Random: %d", val1, val2)
-        wait(0.5)
+        task.wait(0.5)
     end
 end)
 
-print("✅ RNG scripti yüklendi! Buton veya F1 ile aç/kapa.")
+print("✅ RNG Scripti yüklendi! F1 veya buton ile aç/kapa.")
