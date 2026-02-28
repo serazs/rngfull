@@ -1,10 +1,5 @@
---[[
-    MOUNT RNG - Maksimum Zar Scripti (Gelişmiş)
-    Açıklama: Hem math.random hem de Random sınıfını override ederek
-    her zaman en yüksek değeri döndürür. Açma/kapama butonlu arayüz.
-    Uyarı: Roblox hizmet şartlarına aykırıdır, ban riski taşır.
-    Sadece eğitim amaçlıdır.
-]]
+-- MOUNT RNG - Ultimate RNG Script (Xeno uyumlu)
+-- Güvenilirlik için CoreGui + PlayerGui ikili güvence, otomatik onarım ve klavye kontrolü
 
 -- Orijinal fonksiyonları sakla
 local oldMathRandom = math.random
@@ -14,7 +9,7 @@ local oldRandomNextNumber = Random.NextNumber
 
 local isEnabled = false
 
--- Yeni math.random
+-- Override fonksiyonları
 math.random = function(a, b)
     if not isEnabled then
         return oldMathRandom(a, b)
@@ -23,7 +18,6 @@ math.random = function(a, b)
     end
 end
 
--- Random sınıfını değiştir
 Random.new = function(...)
     local rand = oldRandomNew(...)
     rand.NextInteger = function(self, min, max)
@@ -43,69 +37,104 @@ Random.new = function(...)
     return rand
 end
 
--- GUI oluştur
+-- GUI oluşturma fonksiyonu
+local function createGUI(parent)
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "RNGModifier"
+    gui.Parent = parent
+    gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.DisplayOrder = 999999  -- En üstte görünmesi için
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 250, 0, 150)
+    frame.Position = UDim2.new(0.5, -125, 0.5, -75)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    frame.BorderSizePixel = 2
+    frame.BorderColor3 = Color3.fromRGB(0, 255, 0)
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = gui
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    title.Text = "RNG Modifier"
+    title.TextColor3 = Color3.new(1, 1, 1)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.Parent = frame
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0.8, 0, 0, 45)
+    button.Position = UDim2.new(0.1, 0, 0.35, 0)
+    button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Text = "Kapalı"
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 16
+    button.Parent = frame
+
+    button.MouseButton1Click:Connect(function()
+        isEnabled = not isEnabled
+        if isEnabled then
+            button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            button.Text = "Açık"
+        else
+            button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            button.Text = "Kapalı"
+        end
+    end)
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 25, 0, 25)
+    closeBtn.Position = UDim2.new(1, -30, 0, 5)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.new(1, 1, 1)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 18
+    closeBtn.Parent = frame
+
+    closeBtn.MouseButton1Click:Connect(function()
+        gui:Destroy()
+    end)
+
+    return gui
+end
+
+-- GUI'yi hem CoreGui'ye hem de PlayerGui'ye ekle (en az biri çalışır)
 local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui")
-gui.Name = "RNGModifier"
-gui.Parent = player:WaitForChild("PlayerGui")
-gui.ResetOnSpawn = false
+local gui1 = createGUI(game:GetService("CoreGui"))
+local gui2 = player:FindFirstChild("PlayerGui") and createGUI(player.PlayerGui) or nil
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 2
-frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
-frame.Active = true
-frame.Draggable = true
-frame.Parent = gui
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-title.Text = "RNG Modifier"
-title.TextColor3 = Color3.new(1, 1, 1)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 16
-title.Parent = frame
-
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0.8, 0, 0, 40)
-button.Position = UDim2.new(0.1, 0, 0.4, 0)
-button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Text = "Kapalı"
-button.Font = Enum.Font.GothamBold
-button.TextSize = 14
-button.Parent = frame
-
-button.MouseButton1Click:Connect(function()
-    isEnabled = not isEnabled
-    if isEnabled then
-        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        button.Text = "Açık"
-    else
-        button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        button.Text = "Kapalı"
+-- Eğer PlayerGui yoksa bekle ve ekle
+player.CharacterAdded:Connect(function()
+    if not gui2 or not gui2.Parent then
+        gui2 = createGUI(player:WaitForChild("PlayerGui"))
     end
 end)
 
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 20, 0, 20)
-closeBtn.Position = UDim2.new(1, -25, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
-closeBtn.Parent = frame
+-- GUI'nin silinmesini engelle (koruma)
+local function protectGUI(gui)
+    if not gui then return end
+    game:GetService("RunService").Stepped:Connect(function()
+        if gui and gui.Parent == nil then
+            -- GUI silinmişse yeniden oluştur
+            local newGUI = createGUI(game:GetService("CoreGui"))
+            gui = newGUI
+        end
+    end)
+end
+protectGUI(gui1)
+if gui2 then protectGUI(gui2) end
 
-closeBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-    math.random = oldMathRandom
-    Random.new = oldRandomNew
-    Random.NextInteger = oldRandomNextInteger
-    Random.NextNumber = oldRandomNextNumber
+-- Klavye kısayolu: F4 tuşu ile aç/kapa (GUI görünürlüğü değiştir)
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.F4 then
+        if gui1 then gui1.Enabled = not gui1.Enabled end
+        if gui2 then gui2.Enabled = not gui2.Enabled end
+    end
 end)
 
-print("Gelişmiş RNG scripti yüklendi. Arayüz açıldı.")
+print("RNG Ultimate script yüklendi! GUI görünmezse F4'e bas. Aç/Kapa butonu ile modu değiştir.")
