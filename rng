@@ -1,10 +1,18 @@
+--[[
+    MOUNT RNG - Maksimum Zar Scripti (Gelişmiş)
+    Açıklama: Hem math.random hem de Random sınıfını override ederek
+    her zaman en yüksek değeri döndürür. Açma/kapama butonlu arayüz.
+    Uyarı: Roblox hizmet şartlarına aykırıdır, ban riski taşır.
+    Sadece eğitim amaçlıdır.
+]]
+
 -- Orijinal fonksiyonları sakla
 local oldMathRandom = math.random
 local oldRandomNew = Random.new
 local oldRandomNextInteger = Random.NextInteger
 local oldRandomNextNumber = Random.NextNumber
 
-local isEnabled = false  -- Başlangıçta kapalı
+local isEnabled = false
 
 -- Yeni math.random
 math.random = function(a, b)
@@ -18,7 +26,6 @@ end
 -- Random sınıfını değiştir
 Random.new = function(...)
     local rand = oldRandomNew(...)
-    -- NextInteger metodunu değiştir
     rand.NextInteger = function(self, min, max)
         if isEnabled then
             return max
@@ -36,34 +43,37 @@ Random.new = function(...)
     return rand
 end
 
--- GUI oluştur (önceki gibi)
+-- GUI oluştur
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Name = "RNGModifier"
 gui.Parent = player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 200, 0, 100)
 frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,30)
-title.BackgroundColor3 = Color3.fromRGB(50,50,50)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 title.Text = "RNG Modifier"
-title.TextColor3 = Color3.new(1,1,1)
+title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
 title.Parent = frame
 
 local button = Instance.new("TextButton")
-button.Size = UDim2.new(0.8,0,0,40)
-button.Position = UDim2.new(0.1,0,0.4,0)
-button.BackgroundColor3 = Color3.fromRGB(255,0,0)
-button.TextColor3 = Color3.new(1,1,1)
+button.Size = UDim2.new(0.8, 0, 0, 40)
+button.Position = UDim2.new(0.1, 0, 0.4, 0)
+button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+button.TextColor3 = Color3.new(1, 1, 1)
 button.Text = "Kapalı"
 button.Font = Enum.Font.GothamBold
 button.TextSize = 14
@@ -72,20 +82,20 @@ button.Parent = frame
 button.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled
     if isEnabled then
-        button.BackgroundColor3 = Color3.fromRGB(0,255,0)
+        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
         button.Text = "Açık"
     else
-        button.BackgroundColor3 = Color3.fromRGB(255,0,0)
+        button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         button.Text = "Kapalı"
     end
 end)
 
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0,20,0,20)
-closeBtn.Position = UDim2.new(1,-25,0,5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255,100,100)
+closeBtn.Size = UDim2.new(0, 20, 0, 20)
+closeBtn.Position = UDim2.new(1, -25, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
 closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 14
 closeBtn.Parent = frame
