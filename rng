@@ -1,103 +1,101 @@
---[[
-    MOUNT RNG - Maksimum Zar Scripti
-    Açıklama: math.random fonksiyonunu değiştirerek her zaman en yüksek sayıyı döndürür.
-    Kullanım: Scripti çalıştır, ekrandaki buton ile aç/kapa.
-    Uyarı: Bu script Roblox'un hizmet şartlarına aykırıdır, hesabın banlanabilir.
-    Sadece eğitim amaçlıdır.
-]]
+-- Orijinal fonksiyonları sakla
+local oldMathRandom = math.random
+local oldRandomNew = Random.new
+local oldRandomNextInteger = Random.NextInteger
+local oldRandomNextNumber = Random.NextNumber
 
--- Değişkenler
-local oldRandom = math.random  -- Orijinal fonksiyonu sakla
-local isEnabled = false        -- Başlangıçta kapalı
+local isEnabled = false  -- Başlangıçta kapalı
 
--- Yeni math.random fonksiyonu (aktifken max döndürür)
-local function newRandom(a, b)
+-- Yeni math.random
+math.random = function(a, b)
     if not isEnabled then
-        -- Eğer kapalıysa orijinal fonksiyonu çağır
-        if b then
-            return oldRandom(a, b)
-        else
-            return oldRandom(a)
-        end
+        return oldMathRandom(a, b)
     else
-        -- Aktifse her zaman maksimumu döndür
-        if b then
-            return b
-        else
-            return a
-        end
+        return b or a
     end
 end
 
--- math.random'u değiştir
-math.random = newRandom
+-- Random sınıfını değiştir
+Random.new = function(...)
+    local rand = oldRandomNew(...)
+    -- NextInteger metodunu değiştir
+    rand.NextInteger = function(self, min, max)
+        if isEnabled then
+            return max
+        else
+            return oldRandomNextInteger(self, min, max)
+        end
+    end
+    rand.NextNumber = function(self, min, max)
+        if isEnabled then
+            return max or 1
+        else
+            return oldRandomNextNumber(self, min, max)
+        end
+    end
+    return rand
+end
 
--- GUI Oluşturma
+-- GUI oluştur (önceki gibi)
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
 gui.Name = "RNGModifier"
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Ana çerçeve
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 200, 0, 100)
 frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 2
-frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
 
--- Başlık
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundColor3 = Color3.fromRGB(50,50,50)
 title.Text = "RNG Modifier"
+title.TextColor3 = Color3.new(1,1,1)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
 title.Parent = frame
 
--- Buton
 local button = Instance.new("TextButton")
-button.Size = UDim2.new(0.8, 0, 0, 40)
-button.Position = UDim2.new(0.1, 0, 0.4, 0)
-button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Size = UDim2.new(0.8,0,0,40)
+button.Position = UDim2.new(0.1,0,0.4,0)
+button.BackgroundColor3 = Color3.fromRGB(255,0,0)
+button.TextColor3 = Color3.new(1,1,1)
 button.Text = "Kapalı"
 button.Font = Enum.Font.GothamBold
 button.TextSize = 14
 button.Parent = frame
 
--- Buton tıklama işlevi
 button.MouseButton1Click:Connect(function()
     isEnabled = not isEnabled
     if isEnabled then
-        button.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        button.BackgroundColor3 = Color3.fromRGB(0,255,0)
         button.Text = "Açık"
     else
-        button.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        button.BackgroundColor3 = Color3.fromRGB(255,0,0)
         button.Text = "Kapalı"
     end
 end)
 
--- Kapatma butonu
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 20, 0, 20)
-closeBtn.Position = UDim2.new(1, -25, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Size = UDim2.new(0,20,0,20)
+closeBtn.Position = UDim2.new(1,-25,0,5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255,100,100)
 closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.new(1,1,1)
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 14
 closeBtn.Parent = frame
 
 closeBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
-    -- Orijinal fonksiyonu geri yükle
-    math.random = oldRandom
+    math.random = oldMathRandom
+    Random.new = oldRandomNew
+    Random.NextInteger = oldRandomNextInteger
+    Random.NextNumber = oldRandomNextNumber
 end)
 
-print("Script yüklendi. Arayüz açıldı.")
+print("Gelişmiş RNG scripti yüklendi. Arayüz açıldı.")
