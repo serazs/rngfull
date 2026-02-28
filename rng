@@ -1,0 +1,16 @@
+# MOUNT RNG - Maksimum Zar Scripti
+
+Bu script, MOUNT RNG oyununda zar atışlarında her zaman en yüksek sayıyı getirir. Açma/kapama butonlu bir arayüz içerir.
+
+## Kullanım
+- Scripti Roblox exploitinizde çalıştırın.
+- Ekranda beliren buton ile aktifleştirip kapatabilirsiniz.
+- Aktifken `math.random` her zaman maksimum değeri döndürür.
+
+## Uyarı
+Bu script Roblox'un hizmet şartlarına aykırıdır. Hesabınızın banlanmasına neden olabilir. Sadece eğitim amaçlıdır.
+
+## Nasıl Çalışır?
+- Orijinal `math.random` fonksiyonu saklanır.
+- Yeni fonksiyon, aktifken üst sınırı döndürür.
+- Arayüz ile kolayca açılıp kapanır.
